@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Habit Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0a0a1c;--card:#11112b;--line:#25254d;--tx:#eef0ff;--mut:#8b8fb8;--w1:#5b45f0;--w2:#3b82f6;--w3:#2dd4bf;--w4:#ec4899;--w5:#34d399;--red:#ef4444;--yel:#facc15;--grn:#34d399;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Montserrat,system-ui,sans-serif;font-size:14px}
+.wrap{max-width:1240px;margin:0 auto;padding:16px}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.title{flex:1 1 220px;display:flex;flex-direction:column;justify-content:center}
+.title h1{margin:0;font-size:38px;font-weight:400;letter-spacing:.5px}
+.title small{font-weight:700;color:var(--mut);font-size:12px}
+.nav{display:flex;gap:6px;margin-top:8px}
+button{font:inherit;background:#1b1b44;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+button:hover{background:#26265a}
+button:focus-visible,input:focus-visible{outline:2px solid var(--w2);outline-offset:2px}
+.stat{flex:1 1 120px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.stat b{font-size:22px}.stat span{font-size:11px;font-weight:700;color:var(--mut)}
+.bar{height:12px;border:1px solid var(--line);border-radius:3px;background:#0a0a1c;overflow:hidden;margin:6px auto 0;width:100%}
+.bar i{display:block;height:100%;background:var(--yel)}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:14px}
+@media(max-width:900px){.main{grid-template-columns:1fr}}
+h2{margin:0 0 10px;font-size:20px;font-weight:400}
+.scroll{overflow-x:auto;padding-bottom:6px}
+table{border-collapse:separate;border-spacing:3px;min-width:100%}
+td,th{padding:0;text-align:center;font-weight:600}
+th.hab,td.hab{position:sticky;left:0;background:var(--card);z-index:2;text-align:left;white-space:nowrap;padding-right:10px;font-size:12px;min-width:170px}
+td.hab button{background:none;border:0;color:var(--mut);padding:0 4px;font-size:11px}
+.wk{color:#fff;font-size:13px;border-radius:3px 3px 0 0;padding:4px}
+.dh{color:#fff;font-size:10px;line-height:1.3;padding:3px 0;min-width:26px}
+.c{width:26px;height:26px;border-radius:5px;border:2px solid;background:transparent;padding:0;font-size:14px;line-height:1;color:#fff;display:block;margin:auto}
+.c.x{background:rgba(239,68,68,.25);border-color:var(--red)!important}
+.sum td{font-size:9px;color:#cfd2ff;height:20px}
+.sum td.hab{font-size:12px;color:var(--tx)}
+.rowhdr{font-size:16px;font-weight:400}
+.an{display:grid;grid-template-columns:1fr 70px;gap:6px 8px;align-items:center;font-size:12px}
+.an .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.an .b{height:14px;background:#0a0a1c;border-radius:2px}
+.an .b i{display:block;height:100%;border-radius:2px}
+.an em{font-style:normal;font-size:11px;color:var(--mut);text-align:right}
+.rows{display:flex;flex-direction:column;gap:14px}
+.mi{width:26px;height:24px;background:#0a0a1c;color:var(--tx);border:1px solid var(--line);border-radius:4px;text-align:center;font:inherit;font-size:10px;padding:0;-moz-appearance:textfield}
+.mi::-webkit-inner-spin-button{display:none}
+.add{display:flex;gap:6px;margin-top:10px}
+.add input{flex:1;background:#0a0a1c;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:inherit;font-size:12px}
+.leg{display:flex;gap:14px;font-size:11px;color:var(--mut);margin:6px 0}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+svg{display:block;width:100%;height:auto}
+.hint{color:var(--mut);font-size:11px;margin:8px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="card title"><h1 id="mname"></h1><small>- Habit Tracker -</small>
+      <div class="nav"><button id="prev" aria-label="Previous month">&lt;</button><button id="today">Today</button><button id="next" aria-label="Next month">&gt;</button></div></div>
+    <div class="card stat"><span>Number of Habits</span><b id="sH"></b></div>
+    <div class="card stat"><span>Completed Habits</span><b id="sC"></b></div>
+    <div class="card stat"><span>Progress</span><div class="bar"><i id="sB"></i></div></div>
+    <div class="card stat"><span>Progress in %</span><b id="sP"></b></div>
+  </div>
+
+  <div class="main">
+    <div class="rows">
+      <div class="card">
+        <h2>My Habits</h2>
+        <div class="scroll" id="grid"></div>
+        <div class="add"><input id="newH" placeholder="Add a habit, e.g. Read 20 pages 📖" maxlength="40"><button id="addH">Add habit</button></div>
+        <p class="hint">Tap a box: ✓ done, tap again: ✗ missed, again: clear.</p>
+        <div id="chart1"></div>
+      </div>
+      <div class="card">
+        <h2>Mental State</h2>
+        <div class="scroll" id="mental"></div>
+        <div class="leg"><span><i style="background:#60a5fa"></i>Mood</span><span><i style="background:#e5e7ff"></i>Motivation</span><span>Score 0–10</span></div>
+        <div id="chart2"></div>
+      </div>
+    </div>
+    <div class="rows">
+      <div class="card"><h2 style="text-align:center">Analysis</h2><div class="an" id="an"></div></div>
+      <div class="card"><h2 style="text-align:center">Analysis</h2><div class="an" id="an2"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DW=['Su','Mo','Tu','We','Th','Fr','Sa'];
+const WC=['var(--w1)','var(--w2)','var(--w3)','var(--w4)','var(--w5)'];
+const KEY='habit-tracker-v1';
+const DEF=['Wake up at 05:00 ⏰','Gym 💪','Work on Side Hustle 💸','Day Planning 📅','Budget Tracking 💰','Project Work 🚀','No Alcohol 🍾','Social Media Detox 🌿','Goal Journaling 📒','Cold Shower 🚿'];
+let S=null;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!S.habits){S={habits:DEF.map((n,i)=>({id:'h'+i,name:n})),checks:{},mood:{},mot:{}}}
+const now=new Date();let Y=now.getFullYear(),M=now.getMonth();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const pc=n=>(Math.round(n*100)/100)+'%';
+const col=p=>p<40?'var(--red)':p<70?'var(--yel)':'var(--grn)';
+
+function sm(p){let d='M'+p[0][0]+','+p[0][1];for(let i=1;i<p.length;i++){const a=p[i-1],b=p[i],m=(a[0]+b[0])/2;d+=`C${m},${a[1]} ${m},${b[1]} ${b[0]},${b[1]}`}return d}
+
+function render(){
+  const k=Y+'-'+M, dim=new Date(Y,M+1,0).getDate(), H=S.habits;
+  const ck=S.checks[k]=S.checks[k]||{}, mo=S.mood[k]=S.mood[k]||{}, mt=S.mot[k]=S.mot[k]||{};
+  const days=[...Array(dim)].map((_,i)=>i+1), wk=d=>Math.floor((d-1)/7);
+  const nW=wk(dim)+1;
+  $('mname').textContent=MN[M]+(Y!==now.getFullYear()?' '+Y:'');
+
+  // per-day and per-habit numbers
+  const done=days.map(d=>H.filter(h=>(ck[h.id]||{})[d]===1).length);
+  const total=done.reduce((a,b)=>a+b,0), all=H.length*dim, prog=all?total/all*100:0;
+  $('sH').textContent=H.length;$('sC').textContent=total;
+  $('sB').style.width=prog+'%';$('sP').textContent=pc(prog);
+
+  // grid
+  let t='<table><tr><th class="hab"></th>';
+  for(let w=0;w<nW;w++){const n=Math.min(7,dim-w*7);t+=`<th class="wk" colspan="${n}" style="background:${WC[w]}">Week ${w+1}</th>`}
+  t+='</tr><tr><th class="hab"></th>';
+  days.forEach(d=>{t+=`<th class="dh" style="background:${WC[wk(d)]}">${DW[new Date(Y,M,d).getDay()]}<br>${d}</th>`});
+  t+='</tr>';
+  H.forEach(h=>{
+    t+=`<tr><td class="hab">${h.name.replace(/</g,'&lt;')} <button data-del="${h.id}" aria-label="Delete habit" title="Delete">✕</button></td>`;
+    days.forEach(d=>{const v=(ck[h.id]||{})[d]||0,c=WC[wk(d)];
+      t+=`<td><button class="c${v===2?' x':''}" data-h="${h.id}" data-d="${d}" style="border-color:${c};${v===1?'background:'+c:''}" aria-label="${h.name} day ${d}">${v===1?'✓':v===2?'✗':''}</button></td>`});
+    t+='</tr>';
+  });
+  t+='<tr class="sum"><td class="hab">Progress</td>'+days.map((d,i)=>`<td>${Math.round(H.length?done[i]/H.length*100:0)}%</td>`).join('')+'</tr>';
+  t+='<tr class="sum"><td class="hab">Done</td>'+done.map(n=>`<td>${n}</td>`).join('')+'</tr>';
+  t+='<tr class="sum"><td class="hab">Not Done</td>'+done.map(n=>`<td>${H.length-n}</td>`).join('')+'</tr></table>';
+  $('grid').innerHTML=t;
+
+  // area chart
+  const W=840,Ht=150,px=i=>(i+.5)*W/dim,pts=done.map((n,i)=>[px(i),Ht-8-(H.length?n/H.length:0)*(Ht-20)]);
+  $('chart1').innerHTML=`<svg viewBox="0 0 ${W} ${Ht}" preserveAspectRatio="none" role="img" aria-label="Daily progress"><path d="${sm(pts)}L${pts[pts.length-1][0]},${Ht}L${pts[0][0]},${Ht}Z" fill="rgba(45,212,191,.22)"/><path d="${sm(pts)}" fill="none" stroke="#9ff3e6" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`;
+
+  // habit analysis
+  $('an').innerHTML=H.map(h=>{const n=days.filter(d=>(ck[h.id]||{})[d]===1).length,p=n/dim*100;
+    return `<span class="n">${h.name.replace(/</g,'&lt;')}</span><div style="display:flex;align-items:center;gap:6px"><div class="b" style="flex:1"><i style="width:${p}%;background:${col(p)}"></i></div></div><span style="display:none"></span>`}).join('');
+  // rewrite to show % to the right of each bar
+  $('an').innerHTML=H.map(h=>{const n=days.filter(d=>(ck[h.id]||{})[d]===1).length,p=n/dim*100;
+    return `<span class="n" title="${h.name.replace(/"/g,'')}">${h.name.replace(/</g,'&lt;')}</span><div style="display:flex;align-items:center;gap:6px"><div class="b" style="flex:1"><i style="width:${p}%;background:${col(p)}"></i></div><em>${pc(p)}</em></div>`}).join('');
+  $('an').style.gridTemplateColumns='1fr 120px';
+
+  // mental state grid
+  let m='<table><tr><th class="hab"></th>';
+  for(let w=0;w<nW;w++){m+=`<th class="wk" colspan="${Math.min(7,dim-w*7)}" style="background:${WC[w]}">Week ${w+1}</th>`}
+  m+='</tr><tr><th class="hab"></th>'+days.map(d=>`<th class="dh" style="background:${WC[wk(d)]}">${DW[new Date(Y,M,d).getDay()]}<br>${d}</th>`).join('')+'</tr>';
+  [['Mood','mood',mo],['Motivation','mot',mt]].forEach(([n,key,o])=>{
+    m+=`<tr><td class="hab rowhdr">${n}</td>`+days.map(d=>`<td><input class="mi" type="number" min="0" max="10" inputmode="numeric" data-k="${key}" data-d="${d}" value="${o[d]??''}" aria-label="${n} day ${d}"></td>`).join('')+'</tr>'});
+  $('mental').innerHTML=m+'</table>';
+
+  // mood line chart
+  const line=o=>{const p=[];days.forEach((d,i)=>{if(o[d]!==undefined&&o[d]!=='')p.push([px(i),Ht-10-(o[d]/10)*(Ht-24)])});return p};
+  const a=line(mo),b=line(mt),path=(p,c)=>p.length>1?`<path d="${sm(p)}" fill="none" stroke="${c}" stroke-width="2" vector-effect="non-scaling-stroke"/>`:p.map(q=>`<circle cx="${q[0]}" cy="${q[1]}" r="3" fill="${c}"/>`).join('');
+  $('chart2').innerHTML=`<svg viewBox="0 0 ${W} ${Ht}" preserveAspectRatio="none" role="img" aria-label="Mood and motivation">${[0,5,10].map(v=>`<line x1="0" x2="${W}" y1="${Ht-10-v/10*(Ht-24)}" y2="${Ht-10-v/10*(Ht-24)}" stroke="#25254d" vector-effect="non-scaling-stroke"/>`).join('')}${path(a,'#60a5fa')}${path(b,'#e5e7ff')}</svg>`;
+
+  // mindset analysis
+  const wkAvg=(o,w)=>{const v=days.filter(d=>wk(d)===w&&o[d]!==undefined&&o[d]!=='').map(d=>+o[d]);return v.length?v.reduce((x,y)=>x+y,0)/v.length*10:0};
+  $('an2').innerHTML=[['Mood',mo],['Motivation',mt]].map(([n,o])=>`<b style="grid-column:1/-1;color:#a5b4fc;font-size:13px">${n}</b>`+[...Array(nW)].map((_,w)=>{const p=wkAvg(o,w);return `<span class="n">Week ${w+1}</span><div style="display:flex;align-items:center;gap:6px"><div class="b" style="flex:1"><i style="width:${p}%;background:${col(p)}"></i></div><em>${pc(p)}</em></div>`}).join('')).join('');
+  $('an2').style.gridTemplateColumns='60px 1fr';
+}
+
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-h]');
+  if(c){const k=Y+'-'+M,h=c.dataset.h,d=c.dataset.d;const o=S.checks[k][h]=S.checks[k][h]||{};const v=((o[d]||0)+1)%3;if(v)o[d]=v;else delete o[d];save();render();return}
+  const x=e.target.closest('[data-del]');
+  if(x&&confirm('Delete this habit?')){S.habits=S.habits.filter(h=>h.id!==x.dataset.del);save();render()}
+});
+document.addEventListener('change',e=>{
+  const i=e.target.closest('.mi');if(!i)return;
+  const k=Y+'-'+M,o=S[i.dataset.k][k];let v=i.value===''?'':Math.max(0,Math.min(10,+i.value));
+  if(v==='')delete o[i.dataset.d];else o[i.dataset.d]=v;save();render()
+});
+function addHabit(){const v=$('newH').value.trim();if(!v)return;S.habits.push({id:'h'+Date.now(),name:v});$('newH').value='';save();render()}
+$('addH').onclick=addHabit;$('newH').onkeydown=e=>{if(e.key==='Enter')addHabit()};
+$('prev').onclick=()=>{M--;if(M<0){M=11;Y--}render()};
+$('next').onclick=()=>{M++;if(M>11){M=0;Y++}render()};
+$('today').onclick=()=>{Y=now.getFullYear();M=now.getMonth();render()};
+render();
+</script>
+</body>
+</html>
